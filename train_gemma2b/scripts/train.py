@@ -13,7 +13,7 @@ class ScriptArguments:
     """
     These arguments vary depending on how many GPUs you have, what their capacity and features are, and what size model you want to train.
     """
-    per_device_train_batch_size: Optional[int] = field(default=2)
+    per_device_train_batch_size: Optional[int] = field(default=1)
     per_device_eval_batch_size: Optional[int] = field(default=1)
     gradient_accumulation_steps: Optional[int] = field(default=4)
     learning_rate: Optional[float] = field(default=2e-4)
@@ -29,10 +29,6 @@ class ScriptArguments:
             "help": "The model that you want to train from the Hugging Face hub. E.g. gpt2, gpt2-xl, bert, etc."
         }
     )
-    # dataset_name: Optional[str] = field(
-    #     default="stingning/ultrachat",
-    #     metadata={"help": "The preference dataset to use."},
-    # )
     dataset_path: Optional[str] = field(
         default=os.environ["SM_CHANNEL_TRAIN"],
         metadata={"help": "The preference dataset to use."},
@@ -115,8 +111,6 @@ lora_config = LoraConfig(
 # Load dataset from S3
 train_dataset = load_from_disk(script_args.dataset_path)
 
-# TODO: make that configurable
-# YOUR_HF_USERNAME = xxx
 output_dir = script_args.output_dir
 
 training_arguments = TrainingArguments(
@@ -135,8 +129,6 @@ training_arguments = TrainingArguments(
     fp16=script_args.fp16,
     bf16=script_args.bf16,
 )
-
-from peft import peft_model
 
 trainer = SFTTrainer(
     model=model,
